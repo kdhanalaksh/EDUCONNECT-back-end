@@ -8,17 +8,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents("php://input"), true);
 
     // Required fields
-    if (!isset($input['name'], $input['email'], $input['password'], $input['role'], $input['contact_number'], $input['gender'])) {
-        echo json_encode(["status" => "error", "message" => "Missing required fields"]);
-        exit;
-    }
+    if (
+    !isset(
+        $input['name'],
+        $input['email'],
+        $input['password'],
+        $input['role'],
+        $input['contact_number'],
+        $input['gender']
+    )
+) {
+    echo json_encode(["status" => "error", "message" => "Missing required fields"]);
+    exit;
+}
 
-    $name           = $input['name'];
-    $email          = $input['email'];
-    $password       = $input['password'];
-    $role           = $input['role'];
-    $contact_number = $input['contact_number'];
-    $gender         = $input['gender'];
+// Extract variables
+$name = trim($input['name']);
+$email = trim($input['email']);
+$password = trim($input['password']);
+$role = trim($input['role']);
+$contact_number = trim($input['contact_number']);
+$gender = trim($input['gender']);
+
+// Email validation
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["status" => "error", "message" => "Invalid email format"]);
+    exit;
+}
+
+// Password validation (min 8 characters)
+if (strlen($password) < 8) {
+    echo json_encode(["status" => "error", "message" => "Password must be at least 8 characters long"]);
+    exit;
+}
+
+// Contact number validation (only digits, min 10 digits)
+if (!preg_match('/^[0-9]{10,}$/', $contact_number)) {
+    echo json_encode(["status" => "error", "message" => "Contact number must be at least 10 digits and contain only numbers"]);
+    exit;
+}
+
 
     // Profile picture is optional
     $profile_picture = isset($input['profile_picture']) ? $input['profile_picture'] : null;
